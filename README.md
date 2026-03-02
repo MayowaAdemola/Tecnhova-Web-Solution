@@ -1,14 +1,14 @@
-TechNova Solutions
+# TechNova Solutions
 AWS Development Environment Capstone Project
-1. Introduction
+## Introduction
 This project involved designing, provisioning, and deploying a fully automated development environment for TechNova Solutions using AWS cloud services. The objective was to build infrastructure using Terraform, configure and deploy the application using Ansible, and ensure the environment can be destroyed and rebuilt reliably.
-2. Local Development Environment
+## Local Development Environment
 All infrastructure provisioning and configuration tasks were executed from Ubuntu WSL (Windows Subsystem for Linux). The following tools were installed and configured:
 - Terraform
 - Ansible
 - AWS CLI
 - SSH Key Pair for EC2 access
-3. Infrastructure Provisioning with Terraform
+## Infrastructure Provisioning with Terraform
 The infrastructure was  provisioned entirely using Terraform without creating any resources manually via the AWS Console.
 Resources Created:
 - Custom VPC (10.0.0.0/16)
@@ -21,14 +21,14 @@ Resources Created:
 - Amazon S3 Bucket (Private)
 - Security Groups following least privilege principle
 Terraform variables were used for CIDR blocks, instance type, database credentials, and other configurable values. Outputs such as EC2 public IP and RDS endpoint were exported for use in Ansible.
-4. Networking and Security Design
+## Networking and Security Design
 - EC2 deployed in Public Subnet with HTTP (Port 80) open to the internet.
 - SSH (Port 22) restricted to administrator IP only.
 - RDS deployed in Private Subnet with no public access.
 - Database port accessible only from EC2 security group.
 - S3 bucket configured as private by default.
 - IAM Role attached to EC2 for secure S3 access.
-5. Application Deployment with Ansible
+## Application Deployment with Ansible
 After infrastructure provisioning, Ansible was used to configure the EC2 server and deploy the web application automatically.
 Steps Automated via Ansible:
 - System package updates
@@ -39,15 +39,15 @@ Steps Automated via Ansible:
 - Creation of systemd service for application
 - Application startup and enablement
 The application was built using Python FastAPI framework and configured to connect securely to the RDS database and S3 bucket.
-6. Live Application
+## Live Application
 The deployed application is accessible at the following public IP address:
 http://100.53.45.56
-7. Idempotent Deployment
+## Idempotent Deployment
 Both Terraform and Ansible configurations are idempotent. The environment can be destroyed and recreated using:
 terraform destroy
 terraform apply
 ansible-playbook -i inventory.ini playbook.yml
-8. Production Cost Estimate
+## Production Cost Estimate
 For a production environment serving approximately 5,000 daily active users, the architecture would include:
 - Auto Scaling Group (Minimum 2 EC2 instances)
 - Application Load Balancer
@@ -55,7 +55,7 @@ For a production environment serving approximately 5,000 daily active users, the
 - NAT Gateway
 - Daily Automated Backups
 Estimated Monthly Cost: Approximately $275.
-9. Key Learnings
+## Key Learnings
 - Importance of Infrastructure as Code
 - Security best practices in VPC design
 - Difference between development and production architecture
