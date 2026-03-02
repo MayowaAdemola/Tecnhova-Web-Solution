@@ -1,4 +1,4 @@
-# TechNova Solutions
+<img width="1536" height="1024" alt="aws pics" src="https://github.com/user-attachments/assets/692426ab-83be-4c5f-b4e7-daac931772b5" /># TechNova Solutions
 AWS Development Environment Capstone Project
 ## Introduction
 This project involved designing, provisioning, and deploying a fully automated development environment for TechNova Solutions using AWS cloud services. The objective was to build infrastructure using Terraform, configure and deploy the application using Ansible, and ensure the environment can be destroyed and rebuilt reliably.
@@ -21,6 +21,9 @@ Resources Created:
 - Amazon S3 Bucket (Private)
 - Security Groups following least privilege principle
 Terraform variables were used for CIDR blocks, instance type, database credentials, and other configurable values. Outputs such as EC2 public IP and RDS endpoint were exported for use in Ansible.
+
+<img width="1536" height="1024" alt="aws pics" src="https://github.com/user-attachments/assets/c52d9f07-4bf8-4d73-8d50-2ca48a947e0e" />
+
 ## Networking and Security Design
 - EC2 deployed in Public Subnet with HTTP (Port 80) open to the internet.
 - SSH (Port 22) restricted to administrator IP only.
