@@ -1,4 +1,4 @@
-<img width="1536" height="1024" alt="aws pics" src="https://github.com/user-attachments/assets/692426ab-83be-4c5f-b4e7-daac931772b5" /># TechNova Solutions
+# TechNova Solutions
 AWS Development Environment Capstone Project
 ## Introduction
 This project involved designing, provisioning, and deploying a fully automated development environment for TechNova Solutions using AWS cloud services. The objective was to build infrastructure using Terraform, configure and deploy the application using Ansible, and ensure the environment can be destroyed and rebuilt reliably.
