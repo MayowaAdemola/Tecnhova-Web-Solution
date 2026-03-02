@@ -1,0 +1,155 @@
+---
+- name: Deploy TechNova Flask App
+  hosts: web
+  become: true
+
+  vars:
+    db_host: "technova-db.ckzo08e267p4.us-east-1.rds.amazonaws.com"
+    db_name: "technova"
+    db_user: "technova"
+    db_password: "TechNova2024!"
+    s3_bucket: "technova-assets-771131758613"
+    aws_region: "us-east-1"
+    secret_key: "technova-super-secret-key-2024"
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install dependencies
+      apt:
+        name:
+          - python3
+          - python3-pip
+          - python3-venv
+          - nginx
+          - git
+        state: present
+
+    - name: Create app directory
+      file:
+        path: /opt/technova
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Create templates directory
+      file:
+        path: /opt/technova/templates
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Copy app.py
+      copy:
+        src: ../files/app.py
+        dest: /opt/technova/app.py
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Copy index.html template
+      copy:
+        src: ../files/templates/index.html
+        dest: /opt/technova/templates/index.html
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Copy requirements.txt
+      copy:
+        src: ../files/requirements.txt
+        dest: /opt/technova/requirements.txt
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Copy init_db.py
+      copy:
+        src: ../files/init_db.py
+        dest: /opt/technova/init_db.py
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Install Python packages
+      pip:
+        requirements: /opt/technova/requirements.txt
+        state: present
+        executable: pip3
+
+    - name: Create systemd service for gunicorn
+      copy:
+        dest: /etc/systemd/system/technova.service
+        content: |
+          [Unit]
+          Description=TechNova Flask App
+          After=network.target
+
+          [Service]
+          User=ubuntu
+          WorkingDirectory=/opt/technova
+          Environment="DB_HOST={{ db_host }}"
+          Environment="DB_NAME={{ db_name }}"
+          Environment="DB_USER={{ db_user }}"
+          Environment="DB_PASSWORD={{ db_password }}"
+          Environment="DB_PORT=5432"
+          Environment="S3_BUCKET={{ s3_bucket }}"
+          Environment="AWS_REGION={{ aws_region }}"
+          Environment="SECRET_KEY={{ secret_key }}"
+          ExecStart=/usr/local/bin/gunicorn --workers 3 --bind 0.0.0.0:5000 app:app
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Configure Nginx
+      copy:
+        dest: /etc/nginx/sites-available/technova
+        content: |
+          server {
+              listen 80;
+              server_name _;
+
+              location / {
+                  proxy_pass http://127.0.0.1:5000;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+              }
+          }
+
+    - name: Enable Nginx site
+      file:
+        src: /etc/nginx/sites-available/technova
+        dest: /etc/nginx/sites-enabled/technova
+        state: link
+
+    - name: Remove default Nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Initialize database tables
+      shell: |
+        cd /opt/technova && DB_HOST={{ db_host }} DB_NAME={{ db_name }} DB_USER={{ db_user }} DB_PASSWORD={{ db_password }} DB_PORT=5432 python3 init_db.py
+      args:
+        executable: /bin/bash
+
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Start and enable technova service
+      systemd:
+        name: technova
+        state: restarted
+        enabled: yes
+
+    - name: Restart Nginx
+      systemd:
+        name: nginx
+        state: restarted
+        enabled: yes
